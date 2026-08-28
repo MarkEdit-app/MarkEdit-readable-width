@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "typeRoots": ["./node_modules/@types"],
+    "module": "esnext",
+    "target": "esnext",
+    "lib": ["es2019", "dom"],
+    "noImplicitAny": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "strictNullChecks": true,
+    "importHelpers": true,
+    "noEmit": true,
+    "skipLibCheck": true
+  }
+}
