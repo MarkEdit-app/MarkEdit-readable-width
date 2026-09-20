@@ -6,6 +6,9 @@ const defaultWidths = [640, 800, 960];
 const defaultReadableWidth = 800;
 const widthLabels = ['Narrow', 'Comfortable', 'Wide'];
 const storageKey = 'extension.markeditReadableWidth.selected';
+// Mirrors the padding MarkEdit-preview applies to `.markdown-body`, used as the floor
+// so that a window narrower than the readable width keeps the pane's original inset.
+const previewPanePadding = 25;
 const configuredWidths = MarkEdit.userSettings['extension.markeditReadableWidth'];
 const widths = Array.isArray(configuredWidths)
   ? [...new Set(configuredWidths.filter((value): value is number => typeof value === 'number' && value > 0))]
@@ -26,7 +29,12 @@ if (cachedWidth === null || (readableWidth !== null && !widths.includes(readable
 }
 
 const widthCompartment = new Compartment();
+const previewStyle = document.createElement('style');
+document.head.appendChild(previewStyle);
+
 MarkEdit.addExtension(widthCompartment.of(createWidthTheme(readableWidth)));
+updatePreviewStyle(readableWidth);
+
 MarkEdit.addMainMenuItem({
   title: 'Readable Width',
   children: [
@@ -52,6 +60,8 @@ function setReadableWidth(width: number | null) {
   MarkEdit.editorView.dispatch({
     effects: widthCompartment.reconfigure(createWidthTheme(width)),
   });
+
+  updatePreviewStyle(width);
 }
 
 function createWidthTheme(width: number | null) {
@@ -61,4 +71,26 @@ function createWidthTheme(width: number | null) {
       maxWidth: `${width}px`,
     },
   });
+}
+
+/**
+ * MarkEdit-preview renders into `.markdown-body`, a sibling of `.cm-editor` rather than
+ * a descendant, so `EditorView.theme` never reaches it. Center its content with a global
+ * rule instead. The selector matches nothing when that extension isn't installed.
+ *
+ * Horizontal padding is used instead of `max-width` because `.markdown-body` is both the
+ * scroll container and the element painting the preview background; narrowing it would
+ * expose the editor behind the preview overlay and leave a gap in side-by-side mode.
+ */
+function updatePreviewStyle(width: number | null) {
+  if (width === null) {
+    previewStyle.textContent = '';
+    return;
+  }
+
+  const inset = `max(${previewPanePadding}px, calc((100% - ${width}px) / 2))`;
+  previewStyle.textContent = `body .markdown-body {
+  padding-left: ${inset};
+  padding-right: ${inset};
+}`;
 }
