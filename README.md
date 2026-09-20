@@ -1,6 +1,6 @@
 # MarkEdit-readable-width
 
-Keeps the editor at a readable maximum width and centers it when the window is wider, including the rendered preview.
+Keeps the editor at a readable maximum width and centers it when the window is wider, including the rendered preview when the MarkEdit-preview extension is enabled.
 
 ## Installation
 
@@ -29,7 +29,7 @@ The selected width or Off state is remembered across launches. Relaunch MarkEdit
 
 ## Preview
 
-When [MarkEdit-preview](https://github.com/MarkEdit-app/MarkEdit-preview) is installed, the selected width also centers its rendered output. The preview background and scrollbar stay full-width, and switching widths applies immediately.
+When [MarkEdit-preview](https://github.com/MarkEdit-app/MarkEdit-preview) is installed and enabled, the selected width also centers its rendered output. The preview background and scrollbar stay full-width, and switching widths applies immediately.
 
 In side-by-side mode each pane is often already narrower than the selected width. The preview then keeps its default spacing, as does a window resized narrower than the selected width.
 
