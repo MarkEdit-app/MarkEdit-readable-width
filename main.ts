@@ -6,8 +6,8 @@ const defaultWidths = [640, 800, 960];
 const defaultReadableWidth = 800;
 const widthLabels = ['Narrow', 'Comfortable', 'Wide'];
 const storageKey = 'extension.markeditReadableWidth.selected';
-// Mirrors the padding MarkEdit-preview applies to `.markdown-body`, used as the floor
-// so that a window narrower than the readable width keeps the pane's original inset.
+
+// Mirrors the padding MarkEdit-preview applies to `.markdown-body`
 const previewPanePadding = 25;
 const configuredWidths = MarkEdit.userSettings['extension.markeditReadableWidth'];
 const widths = Array.isArray(configuredWidths)
@@ -74,13 +74,9 @@ function createWidthTheme(width: number | null) {
 }
 
 /**
- * MarkEdit-preview renders into `.markdown-body`, a sibling of `.cm-editor` rather than
- * a descendant, so `EditorView.theme` never reaches it. Center its content with a global
- * rule instead. The selector matches nothing when that extension isn't installed.
- *
- * Horizontal padding is used instead of `max-width` because `.markdown-body` is both the
- * scroll container and the element painting the preview background; narrowing it would
- * expose the editor behind the preview overlay and leave a gap in side-by-side mode.
+ * MarkEdit-preview renders `.markdown-body` beside `.cm-editor`, outside the theme's
+ * scope, so center it globally. Use padding rather than `max-width` to preserve the
+ * preview background and avoid gaps in side-by-side mode.
  */
 function updatePreviewStyle(width: number | null) {
   if (width === null) {
@@ -90,7 +86,7 @@ function updatePreviewStyle(width: number | null) {
 
   const inset = `max(${previewPanePadding}px, calc((100% - ${width}px) / 2))`;
   previewStyle.textContent = `body .markdown-body {
-  padding-left: ${inset};
-  padding-right: ${inset};
-}`;
+    padding-left: ${inset};
+    padding-right: ${inset};
+  }`;
 }
