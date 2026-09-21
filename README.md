@@ -1,6 +1,6 @@
 # MarkEdit-readable-width
 
-Keeps the editor at a readable maximum width and centers it when the window is wider.
+Keeps the editor at a readable maximum width and centers it when the window is wider, including the rendered preview when the [MarkEdit-preview](https://github.com/MarkEdit-app/MarkEdit-preview) extension is enabled.
 
 ## Installation
 

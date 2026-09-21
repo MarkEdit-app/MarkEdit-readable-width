@@ -6,6 +6,9 @@ const defaultWidths = [640, 800, 960];
 const defaultReadableWidth = 800;
 const widthLabels = ['Narrow', 'Comfortable', 'Wide'];
 const storageKey = 'extension.markeditReadableWidth.selected';
+
+// Mirrors the padding MarkEdit-preview applies to `.markdown-body`
+const previewPanePadding = 25;
 const configuredWidths = MarkEdit.userSettings['extension.markeditReadableWidth'];
 const widths = Array.isArray(configuredWidths)
   ? [...new Set(configuredWidths.filter((value): value is number => typeof value === 'number' && value > 0))]
@@ -26,7 +29,12 @@ if (cachedWidth === null || (readableWidth !== null && !widths.includes(readable
 }
 
 const widthCompartment = new Compartment();
+const previewStyle = document.createElement('style');
+document.head.appendChild(previewStyle);
+
 MarkEdit.addExtension(widthCompartment.of(createWidthTheme(readableWidth)));
+updatePreviewStyle(readableWidth);
+
 MarkEdit.addMainMenuItem({
   title: 'Readable Width',
   children: [
@@ -52,6 +60,8 @@ function setReadableWidth(width: number | null) {
   MarkEdit.editorView.dispatch({
     effects: widthCompartment.reconfigure(createWidthTheme(width)),
   });
+
+  updatePreviewStyle(width);
 }
 
 function createWidthTheme(width: number | null) {
@@ -61,4 +71,22 @@ function createWidthTheme(width: number | null) {
       maxWidth: `${width}px`,
     },
   });
+}
+
+/**
+ * MarkEdit-preview renders `.markdown-body` beside `.cm-editor`, outside the theme's
+ * scope, so center it globally. Use padding rather than `max-width` to preserve the
+ * preview background and avoid gaps in side-by-side mode.
+ */
+function updatePreviewStyle(width: number | null) {
+  if (width === null) {
+    previewStyle.textContent = '';
+    return;
+  }
+
+  const inset = `max(${previewPanePadding}px, calc((100% - ${width}px) / 2))`;
+  previewStyle.textContent = `body .markdown-body {
+    padding-left: ${inset};
+    padding-right: ${inset};
+  }`;
 }
