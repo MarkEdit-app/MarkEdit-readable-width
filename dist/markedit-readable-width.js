@@ -1,4 +1,4 @@
 let e=require("@codemirror/state"),t=require("@codemirror/view"),n=require("markedit-api");var r=[640,800,960],i=800,a=[`Narrow`,`Comfortable`,`Wide`],o=`extension.markeditReadableWidth.selected`,s=25,c=n.MarkEdit.userSettings[`extension.markeditReadableWidth`],l=Array.isArray(c)?[...new Set(c.filter(e=>typeof e==`number`&&e>0))].sort((e,t)=>e-t):[];l.length===0&&l.push(...r);var u=localStorage.getItem(o),d=u===`off`?null:Number(u);(u===null||d!==null&&!l.includes(d))&&(d=l.includes(i)?i:l[Math.floor(l.length/2)]);var f=new e.Compartment,p=document.createElement(`style`);document.head.appendChild(p),n.MarkEdit.addExtension(f.of(h(d))),g(d),n.MarkEdit.addMainMenuItem({title:`Readable Width`,children:[...l.map((e,t)=>({title:l.length===a.length?`${a[t]} (${e} px)`:`${e} px wide`,action:()=>m(e),state:()=>({isSelected:d===e})})),{separator:!0},{title:`Off`,action:()=>m(null),state:()=>({isSelected:d===null})}]});function m(e){d=e,localStorage.setItem(o,e===null?`off`:String(e)),n.MarkEdit.editorView.dispatch({effects:f.reconfigure(h(e))}),g(e)}function h(e){return e===null?[]:t.EditorView.theme({".cm-content":{margin:`0 auto`,maxWidth:`${e}px`}})}function g(e){if(e===null){p.textContent=``;return}let t=`max(${s}px, calc((100% - ${e}px) / 2))`;p.textContent=`body .markdown-body {
-  padding-left: ${t};
-  padding-right: ${t};
-}`}
+    padding-left: ${t};
+    padding-right: ${t};
+  }`}

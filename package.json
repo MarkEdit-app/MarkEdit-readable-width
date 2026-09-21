@@ -1,6 +1,6 @@
 {
   "name": "markedit-readable-width",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Center the editor at a configurable readable width.",
   "scripts": {
     "build": "vite build",
