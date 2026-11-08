@@ -32,6 +32,13 @@ const widthCompartment = new Compartment();
 const previewStyle = document.createElement('style');
 document.head.appendChild(previewStyle);
 
+let previewPane: HTMLElement | null = null;
+const previewResizeObserver = new ResizeObserver(() => updatePreviewStyle(readableWidth));
+
+// Preview may be injected after this extension, or replaced when the editor reloads
+new MutationObserver(observePreviewPane).observe(document.body, { childList: true });
+observePreviewPane();
+
 MarkEdit.addExtension(widthCompartment.of(createWidthTheme(readableWidth)));
 updatePreviewStyle(readableWidth);
 
@@ -76,17 +83,33 @@ function createWidthTheme(width: number | null) {
 /**
  * MarkEdit-preview renders `.markdown-body` beside `.cm-editor`, outside the theme's
  * scope, so center it globally. Use padding rather than `max-width` to preserve the
- * preview background and avoid gaps in side-by-side mode.
+ * preview background and avoid gaps in side-by-side mode. Percentage padding uses
+ * the containing block's width, which can include space occupied by sidebars.
  */
 function updatePreviewStyle(width: number | null) {
-  if (width === null) {
+  if (width === null || previewPane === null) {
     previewStyle.textContent = '';
     return;
   }
 
-  const inset = `max(${previewPanePadding}px, calc((100% - ${width}px) / 2))`;
+  const inset = `${Math.max(previewPanePadding, (previewPane.clientWidth - width) / 2)}px`;
   previewStyle.textContent = `body .markdown-body {
     padding-left: ${inset};
     padding-right: ${inset};
   }`;
+}
+
+function observePreviewPane() {
+  const pane = document.querySelector<HTMLElement>('.markdown-body');
+  if (pane === previewPane) {
+    return;
+  }
+
+  previewResizeObserver.disconnect();
+  previewPane = pane;
+  if (pane !== null) {
+    previewResizeObserver.observe(pane);
+  }
+
+  updatePreviewStyle(readableWidth);
 }
