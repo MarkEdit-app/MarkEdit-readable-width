@@ -33,10 +33,33 @@ const previewStyle = document.createElement('style');
 document.head.appendChild(previewStyle);
 
 let previewPane: HTMLElement | null = null;
-const previewResizeObserver = new ResizeObserver(() => updatePreviewStyle(readableWidth));
+let measuredPreviewWidth: number | null = null;
+const previewResizeObserver = new ResizeObserver(() => {
+  // Padding changes the content box, but not necessarily the available pane width
+  if (previewPane !== null && previewPane.clientWidth !== measuredPreviewWidth) {
+    updatePreviewStyle(readableWidth);
+  }
+});
 
-// Preview may be injected after this extension, or replaced when the editor reloads
-new MutationObserver(observePreviewPane).observe(document.body, { childList: true });
+// Allow wrappers without rescanning the document on every preview content update
+new MutationObserver(records => {
+  if (previewPane !== null) {
+    if (!document.body.contains(previewPane)) {
+      observePreviewPane();
+    }
+
+    return;
+  }
+
+  const previewAdded = records.some(record => Array.from(record.addedNodes).some(node =>
+    node instanceof Element
+    && (node.matches('.markdown-body') || node.querySelector('.markdown-body') !== null),
+  ));
+
+  if (previewAdded) {
+    observePreviewPane();
+  }
+}).observe(document.body, { childList: true, subtree: true });
 observePreviewPane();
 
 MarkEdit.addExtension(widthCompartment.of(createWidthTheme(readableWidth)));
@@ -87,16 +110,19 @@ function createWidthTheme(width: number | null) {
  * the containing block's width, which can include space occupied by sidebars.
  */
 function updatePreviewStyle(width: number | null) {
-  if (width === null || previewPane === null) {
-    previewStyle.textContent = '';
-    return;
+  measuredPreviewWidth = previewPane?.clientWidth ?? null;
+  let styleText = '';
+  if (width !== null && measuredPreviewWidth !== null) {
+    const inset = `${Math.max(previewPanePadding, (measuredPreviewWidth - width) / 2)}px`;
+      styleText = `body .markdown-body {
+      padding-left: ${inset};
+      padding-right: ${inset};
+    }`;
   }
 
-  const inset = `${Math.max(previewPanePadding, (previewPane.clientWidth - width) / 2)}px`;
-  previewStyle.textContent = `body .markdown-body {
-    padding-left: ${inset};
-    padding-right: ${inset};
-  }`;
+  if (previewStyle.textContent !== styleText) {
+    previewStyle.textContent = styleText;
+  }
 }
 
 function observePreviewPane() {
