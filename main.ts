@@ -31,10 +31,11 @@ if (cachedWidth === null || (readableWidth !== null && !widths.includes(readable
 const widthCompartment = new Compartment();
 const previewStyle = document.createElement('style');
 document.head.appendChild(previewStyle);
+
 let previewPane: HTMLElement | null = null;
 const previewResizeObserver = new ResizeObserver(() => updatePreviewStyle(readableWidth));
 
-// Preview may be injected after this extension, or replaced when the editor reloads.
+// Preview may be injected after this extension, or replaced when the editor reloads
 new MutationObserver(observePreviewPane).observe(document.body, { childList: true });
 observePreviewPane();
 
