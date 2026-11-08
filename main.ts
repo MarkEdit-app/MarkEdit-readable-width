@@ -109,5 +109,6 @@ function observePreviewPane() {
   if (pane !== null) {
     previewResizeObserver.observe(pane);
   }
+
   updatePreviewStyle(readableWidth);
 }
